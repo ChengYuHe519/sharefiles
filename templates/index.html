@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>文件共享</title>
+    <style>
+        body {
+            font-family: system-ui;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .upload-form {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+        }
+        .file-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-name {
+            flex-grow: 1;
+        }
+        .file-size {
+            color: #666;
+            margin-left: 10px;
+        }
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #388e3c;
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>简单文件共享</h1>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    {% if success %}
+    <div class="success">{{ success }}</div>
+    {% endif %}
+
+    <div class="upload-form">
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="file" name="file" required>
+            <input type="submit" value="上传文件">
+        </form>
+    </div>
+
+    <h2>文件列表（{{ files|length }} 个）</h2>
+
+    {% if files %}
+    <ul class="file-list">
+        {% for file in files %}
+        <li class="file-item">
+            <span class="file-name">
+                <a href="/download/{{ file[0]|urlencode }}" download>{{ file[0] }}</a>
+            </span>
+            <span class="file-size">{{ file[1] }} MB</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>暂无文件</p>
+    {% endif %}
+</body>
+</html>

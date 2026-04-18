@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>管理员登录</title>
+    <style>
+        body {
+            font-family: system-ui;
+            max-width: 400px;
+            margin: 100px auto;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .login-form {
+            margin: 30px 0;
+        }
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .submit-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .submit-button:hover {
+            background: #0056b3;
+        }
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #666;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>管理员登录</h1>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <div class="login-form">
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="password" name="password" placeholder="输入管理员密码" class="password-input" autofocus required>
+            <input type="submit" value="登录" class="submit-button">
+        </form>
+    </div>
+
+    <a href="/" class="back-link">← 返回首页</a>
+</body>
+</html>

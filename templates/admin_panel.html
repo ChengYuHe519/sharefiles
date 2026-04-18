@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>管理员后台</title>
+    <style>
+        body {
+            font-family: system-ui;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .header-links {
+            margin: 20px 0;
+        }
+        .header-links a {
+            margin-right: 15px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .header-links a:hover {
+            text-decoration: underline;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+        }
+        .file-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-info {
+            flex-grow: 1;
+        }
+        .file-name {
+            font-weight: 500;
+        }
+        .file-size {
+            color: #666;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .delete-form {
+            margin-left: 15px;
+        }
+        .delete-button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .delete-button:hover {
+            background: #c82333;
+        }
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>管理员后台</h1>
+
+    <div class="header-links">
+        <a href="/">← 返回首页</a>
+        <a href="/logout">退出登录</a>
+    </div>
+
+    <h2>文件列表（共 {{ files|length }} 个）</h2>
+
+    {% if files %}
+    <ul class="file-list">
+        {% for file in files %}
+        <li class="file-item">
+            <div class="file-info">
+                <span class="file-name">{{ file[0] }}</span>
+                <span class="file-size">{{ file[1] }} MB</span>
+            </div>
+            <form method="post" action="/delete/{{ file[0]|urlencode }}" class="delete-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="delete-button" onclick="return confirm('确定永久删除 {{ file[0] }} 吗？不可恢复！')">
+                    🗑 删除
+                </button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty-state">
+        <p>暂无文件</p>
+    </div>
+    {% endif %}
+</body>
+</html>

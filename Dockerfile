@@ -1,6 +1,9 @@
 # 使用官方Python镜像
 FROM python:3.11-slim
 
+# 换源
+RUN sed -i 's|http://deb.debian.org/debian|https://mirrors.aliyun.com/debian|g' /etc/apt/sources.list.d/debian.sources
+
 # 设置工作目录
 WORKDIR /app
 
@@ -26,10 +29,6 @@ COPY . .
 
 # 创建上传目录
 RUN mkdir -p /app/files
-
-# 创建非root用户
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-USER appuser
 
 # 暴露端口
 EXPOSE 5000

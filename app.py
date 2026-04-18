@@ -84,13 +84,18 @@ MAX_FILE_SIZE_GB = int(os.getenv('MAX_FILE_SIZE_GB', '2'))
 if not ADMIN_PASSWORD:
     raise ValueError("ADMIN_PASSWORD 环境变量必须设置")
 
-# 将明文密码转换为哈希存储
+# 检查是否是Gunicorn工作进程
+import multiprocessing
+IS_GUNICORN_WORKER = 'gunicorn' in multiprocessing.current_process().name.lower()
+
+# 将明文密码转换为哈希存储（只在主进程或非Gunicorn环境下执行）
 if not ADMIN_PASSWORD.startswith(':'):  # 简单判断是否为哈希格式
     if len(ADMIN_PASSWORD) < 8:
         raise ValueError("ADMIN_PASSWORD 至少需要8个字符")
-    # 如果是明文密码，转换为哈希并打印提示
+
+    # 如果是明文密码，转换为哈希
     hashed_password = hash_password(ADMIN_PASSWORD)
-    print(f"注意: 明文密码已自动哈希。下次部署时建议直接使用哈希值: {hashed_password}")
+
     ADMIN_PASSWORD_HASH = hashed_password
 else:
     ADMIN_PASSWORD_HASH = ADMIN_PASSWORD
@@ -99,7 +104,6 @@ if len(SESSION_SECRET) < 32:
 if MAX_FILE_SIZE_GB <= 0 or MAX_FILE_SIZE_GB > 100:
     raise ValueError("MAX_FILE_SIZE_GB 必须在1-100之间")
 
-print(f"配置加载成功: UPLOAD_FOLDER={UPLOAD_FOLDER}, MAX_FILE_SIZE_GB={MAX_FILE_SIZE_GB}")
 # ====================================================
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -294,7 +298,10 @@ def download(filename):
     filename = urllib.parse.unquote(filename)
     # 安全处理文件名
     filename = safe_filename(filename)
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    # 添加 X-Accel-Buffering 头，告诉 Nginx 禁用缓冲
+    response = send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    response.headers['X-Accel-Buffering'] = 'no'  # 关键！
+    return response
 
 # ====================== 管理员登录 + 面板 ======================
 @app.route('/admin', methods=['GET', 'POST'])

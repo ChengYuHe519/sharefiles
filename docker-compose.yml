@@ -1,44 +1,37 @@
-version: '3.8'
-
 services:
   sharefiles:
     build: .
     container_name: sharefiles
     restart: unless-stopped
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     environment:
       - UPLOAD_FOLDER=/app/files
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme123}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - SESSION_SECRET=${SESSION_SECRET:-$(openssl rand -hex 32)}
       - MAX_FILE_SIZE_GB=${MAX_FILE_SIZE_GB:-2}
       - DOCKER_CONTAINER=true
       - DEBUG_IP=${DEBUG_IP:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
-      - ./files:/app/files
+      - /your-file-path:/app/files
     networks:
-      - sharefiles-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - sharefiles
 
-  nginx:
+  sharefiles-nginx:
     image: nginx:alpine
     container_name: sharefiles-nginx
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "your-host-port:5000"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
+      - /your-ssl-path:/etc/nginx/ssl:ro
     depends_on:
       - sharefiles
     networks:
-      - sharefiles-network
+      - sharefiles
 
 networks:
-  sharefiles-network:
+  sharefiles:
     driver: bridge

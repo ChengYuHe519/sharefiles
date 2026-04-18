@@ -6,20 +6,36 @@ import multiprocessing
 # 服务器绑定
 bind = "0.0.0.0:5000"
 
-# 工作进程数
-workers = multiprocessing.cpu_count() * 2 + 1
+# 工作进程数（根据服务器规模调整）
+cpu_count = multiprocessing.cpu_count()
+
+# 生产环境建议配置
+if cpu_count <= 2:          # 小型服务器（1-2核）
+    workers = 3
+elif cpu_count <= 4:        # 中型服务器（3-4核）
+    workers = cpu_count * 2
+elif cpu_count <= 8:        # 标准服务器（5-8核）
+    workers = cpu_count + 2
+elif cpu_count <= 16:       # 大型服务器（9-16核）
+    workers = cpu_count
+else:                       # 超大型服务器（16+核）
+    workers = 16            # 限制最大工作进程数
+
+print(f"CPU核心数: {cpu_count}, 设置工作进程数: {workers}")
 
 # 工作进程类型
-worker_class = "sync"
+worker_class = "gthread"
+threads = 4
 
 # 超时设置
-timeout = 30
+timeout = 600
 keepalive = 2
 
 # 日志配置
+import os
 accesslog = "-"  # 输出到标准输出
 errorlog = "-"   # 输出到标准错误
-loglevel = "info"
+loglevel = os.getenv('LOG_LEVEL', 'info').lower()
 
 # 进程名称
 proc_name = "sharefiles"
